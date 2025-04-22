@@ -37,6 +37,7 @@ contract ERC1337 is ERC20, EIP712, Nonces, ERC2771Context {
         _mint(_msgSender(), 9999 ether);
     }
 
+    // permitAndTransfer을 사용해서 token을 transfer 해야함
     function permitAndTransfer(
         string memory note,
         address owner,
@@ -51,6 +52,7 @@ contract ERC1337 is ERC20, EIP712, Nonces, ERC2771Context {
             revert ERC2612ExpiredSignature();
         }
 
+        // Transfer을 하기 위해 _verifySignatureType1, _verifySignatureType2를 만족해야함
         if (!_verifySignatureType1(
             owner, 
             _hashTypedDataV4(keccak256(abi.encode(
@@ -92,6 +94,7 @@ contract ERC1337 is ERC20, EIP712, Nonces, ERC2771Context {
         return ECDSA.recover(hash, v, r, s);
     }
 
+    // 검증 1
     function _verifySignatureType1(
         address owner,
         bytes32 hash,
@@ -106,6 +109,7 @@ contract ERC1337 is ERC20, EIP712, Nonces, ERC2771Context {
         }
     }
 
+    // 검증 2
     function _verifySignatureType2(
         address owner,
         bytes32 hash,
@@ -114,6 +118,7 @@ contract ERC1337 is ERC20, EIP712, Nonces, ERC2771Context {
         bytes32 s
     ) internal view returns (bool) {
         try this.ecrecover(hash, v, r, s) returns (address signer) {
+            // _msgSender() -> 솔리디티 계약에서 현재 트랜잭션을 보내는 계정의 주소를 반환하는 함수
             return signer == _msgSender() || signer == owner;
         } catch {
             return false;
